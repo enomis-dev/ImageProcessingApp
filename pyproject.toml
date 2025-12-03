@@ -1,0 +1,25 @@
+[project]
+name = "ImageProcessingApp"
+version = "0.1.0"
+description = "A simple image processing application with Tkinter, Pillow, Matplotlib, and OpenCV."
+authors = [
+    { name = "Simone De Gasperis", email = "your_email@example.com" }, # Replace with your actual name and email
+]
+dependencies = [
+    "Pillow~=10.0",
+    "matplotlib~=3.8",
+    "opencv-python~=4.9",
+]
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+Homepage = "https://github.com/SimoneDeGasperis/ImageProcessingApp" # Replace with your actual GitHub URL
+Repository = "https://github.com/SimoneDeGasperis/ImageProcessingApp" # Replace with your actual GitHub URL
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["venv", "venv/*"]

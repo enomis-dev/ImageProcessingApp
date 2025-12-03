@@ -59,7 +59,6 @@ class ImageApp(Frame):
         #self.master.attributes("-fullscreen", True)
         #w, h = self.master.winfo_screenwidth(), self.master.winfo_screenheight()
         #self.master.geometry("%dx%d+0+0" % (w, h))
-        self.master.state('zoomed')
         self.master.resizable(True, True)
         # Separator object
         self.separator = Separator(self.master, orient='vertical')
