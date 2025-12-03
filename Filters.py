@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter.ttk import Separator
 from PIL import ImageTk, Image
-import matplotlib.pyplot as plt
 import cv2 as cv
 import os
+
+import image_processing
 
 
 class Filters(Frame):
@@ -18,7 +19,7 @@ class Filters(Frame):
         self.button_contours = None
 
         # input image
-        self.processed = image
+        self.processed_image = image
 
         self.create_window()
 
@@ -32,30 +33,32 @@ class Filters(Frame):
         #self.master.state('zoomed')
         self.master.resizable(True, True)
         # Add Filter button
-        self.button_sharpen = Button(self.master, text="Sharpen", height=3, width=15, bd = 4, command=self.donothing)
+        self.button_sharpen = Button(self.master, text="Sharpen", height=3, width=15, bd = 4, command=self.apply_sharpen_filter)
         self.button_sharpen.place(relx=0.5, rely=0.05, relwidth=0.1, relheight=0.1)
         # Add Crop button
-        self.button_blur = Button(self.master, text="Blur", height=3, width=15, bd = 4, command=self.blur)
+        self.button_blur = Button(self.master, text="Blur", height=3, width=15, bd = 4, command=self.apply_blur_filter)
         self.button_blur.place(relx=0.5, rely=0.17, relwidth=0.1, relheight=0.1)
         # Add Draw button
-        self.button_contours = Button(self.master, text="Contours", height=3, width=15, bd = 4, command=self.contours)
+        self.button_contours = Button(self.master, text="Contours", height=3, width=15, bd = 4, command=self.apply_contours_filter)
         self.button_contours.place(relx=0.5, rely=0.29, relwidth=0.1, relheight=0.1)
 
-    # TODO function
-    def donothing(self):
-        filewin = Toplevel(self.master)
-        button = Button(filewin, text="TODO")
-        button.pack()
-
     # Sharpen the image
-    #def sharpen(self):
+    def apply_sharpen_filter(self):
+        if self.processed_image is not None:
+            self.processed_image = image_processing.apply_sharpen(self.processed_image)
+            self.master.destroy()
 
     # Blur the image
-    def blur(self):
-        self.processed = cv.GaussianBlur(self.processed, (7,7), 0)
-        self.quit()
+    def apply_blur_filter(self):
+        if self.processed_image is not None:
+            self.processed_image = image_processing.apply_blur(self.processed_image)
+            self.master.destroy()
 
     # Convert the image to gray and draw contours
-    def contours(self):
-        self.processed = cv.Canny(self.processed , 150, 175)
-        self.quit()
+    def apply_contours_filter(self):
+        if self.processed_image is not None:
+            self.processed_image = image_processing.detect_contours(self.processed_image)
+            self.master.destroy()
+
+    def get_processed_image(self):
+        return self.processed_image
