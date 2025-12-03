@@ -31,8 +31,8 @@ class ImageApp(Frame):
         # Image Canvas
         self.canvas = None
         # canvas width and heigth
-        self.WIDTH_CANVAS = 804
-        self.HEIGHT_CANVAS = 654
+        self.WIDTH_CANVAS = 1200
+        self.HEIGHT_CANVAS = 800
         # Add buttons
         self.button_filter = None
         self.button_crop = None
@@ -67,7 +67,7 @@ class ImageApp(Frame):
         self.button_filter = Button(self.master, text="Filters", height=3, width=15, bd = 4,  command=self.open_filters_window)
         self.button_filter.place(relx=0.05, rely=0.05, relwidth=0.1, relheight=0.1)
         # Add Crop button
-        self.button_crop = Button(self.master, text="Crop", height=3, width=15, bd = 4)
+        self.button_crop = Button(self.master, text="Crop", height=3, width=15, bd = 4, command=self.start_crop_selection)
         self.button_crop.place(relx=0.05, rely=0.17, relwidth=0.1, relheight=0.1)
         # Add Draw button
         self.button_draw = Button(self.master, text="Draw", height=3, width=15, bd = 4)
@@ -121,7 +121,7 @@ class ImageApp(Frame):
         self.menuBar.add_cascade(label="Help", menu=self.helpmenu)
 
     def create_widgets(self):
-        self.canvas = Canvas(self.master, bg="gray", width=800, height=650)
+        self.canvas = Canvas(self.master, bg="gray", width=self.WIDTH_CANVAS, height=self.HEIGHT_CANVAS)
         self.canvas.place(relx=0.5, rely=0.5, anchor=CENTER)
 
     # Function to open an image
@@ -176,6 +176,11 @@ class ImageApp(Frame):
         self.canvas.config(width=new_width, height=new_height)
         self.canvas.create_image(new_width / 2, new_height / 2, anchor=CENTER, image=self.shown_image)
 
+        # Store the currently displayed image dimensions and position for accurate cropping
+        self.display_width = new_width
+        self.display_height = new_height
+
+
     # Function to save the image
     def save_img(self):
         file = filedialog.asksaveasfile(mode='w', defaultextension=".png",
@@ -184,7 +189,7 @@ class ImageApp(Frame):
             return
         else:
             abs_path = os.path.abspath(file.name)
-            self.img.save(abs_path)
+            Image.fromarray(self.processed_image).save(abs_path)
 
     # TODO function
     def donothing(self):
@@ -233,3 +238,70 @@ class ImageApp(Frame):
         self.processed_image = deepcopy(self.original_image)
         print('Update canvas')
         self.show_image()
+
+    # Crop functionality
+    def start_crop_selection(self):
+        if self.processed_image is not None:
+            self.cropping = True
+            self.start_x = None
+            self.start_y = None
+            self.current_rect = None
+            self.canvas.bind("<ButtonPress-1>", self.on_mouse_button_press)
+            self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
+            self.canvas.bind("<ButtonRelease-1>", self.on_mouse_button_release)
+            print("Crop selection started. Click and drag on the image.")
+
+    def on_mouse_button_press(self, event):
+        if self.cropping:
+            self.start_x = event.x
+            self.start_y = event.y
+            # Delete any existing rectangle
+            if self.current_rect:
+                self.canvas.delete(self.current_rect)
+            self.current_rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="red")
+
+    def on_mouse_drag(self, event):
+        if self.cropping and self.current_rect:
+            self.canvas.coords(self.current_rect, self.start_x, self.start_y, event.x, event.y)
+
+    def on_mouse_button_release(self, event):
+        if self.cropping and self.current_rect:
+            end_x = event.x
+            end_y = event.y
+
+            # Ensure start_x/y and end_x/y are correctly ordered for cropping
+            x1 = min(self.start_x, end_x)
+            y1 = min(self.start_y, end_y)
+            x2 = max(self.start_x, end_x)
+            y2 = max(self.start_y, end_y)
+
+            # Clean up the canvas and reset cropping state
+            self.canvas.delete(self.current_rect)
+            self.current_rect = None
+            self.cropping = False
+            self.canvas.unbind("<ButtonPress-1>")
+            self.canvas.unbind("<B1-Motion>")
+            self.canvas.unbind("<ButtonRelease-1>")
+
+            # Perform cropping if a valid selection was made
+            if x2 > x1 and y2 > y1:
+                print(f"Crop coordinates (canvas): ({x1}, {y1}) to ({x2}, {y2})")
+                # Now we need to convert canvas coordinates to image coordinates
+                img_x1, img_y1 = self.canvas_to_image_coords(x1, y1)
+                img_x2, img_y2 = self.canvas_to_image_coords(x2, y2)
+
+                # Call the image processing crop function (will be implemented next)
+                self.processed_image = image_processing.crop_image(self.processed_image, img_x1, img_y1, img_x2, img_y2)
+                self.show_image()
+            else:
+                print("Invalid crop selection.")
+
+    def canvas_to_image_coords(self, canvas_x, canvas_y):
+        # Recalculate ratio for accurate scaling based on actual processed_image dimensions
+        original_height, original_width = self.processed_image.shape[:2]
+        scale_x = original_width / self.display_width
+        scale_y = original_height / self.display_height
+
+        img_x = int(canvas_x * scale_x)
+        img_y = int(canvas_y * scale_y)
+        return img_x, img_y

@@ -35,6 +35,22 @@ def apply_sharpen(image: np.ndarray) -> np.ndarray:
                        [0, -1, 0]])
     return cv.filter2D(image, -1, kernel)
 
+def crop_image(image: np.ndarray, x1: int, y1: int, x2: int, y2: int) -> np.ndarray:
+    """Crops an image given the top-left (x1, y1) and bottom-right (x2, y2) coordinates."""
+    # Ensure coordinates are within image bounds
+    height, width = image.shape[:2]
+    x1 = max(0, x1)
+    y1 = max(0, y1)
+    x2 = min(width, x2)
+    y2 = min(height, y2)
+
+    if x1 >= x2 or y1 >= y2:
+        print("Invalid cropping dimensions.")
+        return image # Return original image if dimensions are invalid
+
+    cropped_image = image[y1:y2, x1:x2]
+    return cropped_image
+
 def generate_histogram(image: np.ndarray):
     """Generates and displays color histograms for the image."""
     plt.figure()
