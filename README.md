@@ -2,8 +2,7 @@
 
 A simple desktop application for basic image processing tasks, built with Python's Tkinter, Pillow, Matplotlib, and OpenCV. This application allows users to open, view, and apply various transformations and filters to images.
 
-![ImageProcessingApp](https://github.com/SimoneDeGasperis/ImageProcessingApp/assets/36958248/
-b5058d4f-c395-4d4d-8f55-e592f6671009)
+![Example](test_image.JPG)
 
 ## Features
 
