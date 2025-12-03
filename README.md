@@ -2,7 +2,7 @@
 
 A simple desktop application for basic image processing tasks, built with Python's Tkinter, Pillow, Matplotlib, and OpenCV. This application allows users to open, view, and apply various transformations and filters to images.
 
-![Example](test_image.JPG)
+![Example](interface.jpg)
 
 ## Features
 
